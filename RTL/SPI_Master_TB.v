@@ -93,25 +93,6 @@ initial
         i_SPI_Send_Data=32'hffffa5a5;
         #100
         i_SPI_Send_Sync=1;
-//      // Tell UART to send a command (exercise Tx)
-//      @(posedge r_Clock);
-//      @(posedge r_Clock);
-//      r_Tx_DV <= 1'b1;
-//      r_Tx_Byte <= 8'hAB;
-//      @(posedge r_Clock);
-//      r_Tx_DV <= 1'b0;
-//      @(posedge w_Tx_Done);
-       
-//      // Send a command to the UART (exercise Rx)
-//      @(posedge r_Clock);
-//      UART_WRITE_BYTE(8'h3F);
-//      @(posedge r_Clock);
-             
-//      // Check that the correct command was received
-//      if (w_Rx_Byte == 8'h3F)
-//        $display("Test Passed - Correct Byte Received");
-//      else
-//        $display("Test Failed - Incorrect Byte Received");
        
     end
     
