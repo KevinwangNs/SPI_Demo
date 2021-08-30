@@ -16,16 +16,22 @@
 // Revision:
 // Revision 0.01 - File Created
 //          0.10 - Add receive
-//          0.11 - Add Send_  
+//          0.11 - Add clk parameter
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
  // IP Setting parameter  
 // please set those to meet the requirment of Slave IC datasheet
-module SPI_Master(
 
-
-    input c_clk_100m,
+module SPI_Master #(
+    parameter[5:0] TRAN_WIDTH = 2, //8~32
+    parameter IDLE_VALUE_for_Clk = 0,
+    parameter IDLE_VALUE_for_MOSI = 0,
+    parameter DATA_VALID_at_FALLING = 1,//set 0 for RISING EDGE
+    parameter DIVIDE_VALUE_for_Clk_Freq = 0,
+    parameter Receive_VALID_at_FALLING = 0//0~1
+    )(
+    input c_Clk_High,
     //////Send Inferface
     input i_SPI_Send_Sync,
     input [TRAN_WIDTH-1:0] i_SPI_Send_Data,
@@ -33,6 +39,7 @@ module SPI_Master(
     //////Receive Inferface
     output reg o_SPI_Receive_Sync = 0,
     output reg [TRAN_WIDTH-1:0]o_SPI_Receive_Data = 0,
+    output reg [TRAN_WIDTH-1:0]o_SPI_Sent_Data = 0,
     /////SPI Inferface
     output reg o_SPI_Clk = 1,
     output reg o_SPI_SS = 1,
@@ -41,23 +48,18 @@ module SPI_Master(
     
     
     );
-parameter IDLE_VALUE_for_Clk = 0;
-parameter IDLE_VALUE_for_MOSI = 0;
-parameter DATA_VALID_at_FALLING = 1;//set 0 for RISING EDGE
-parameter[5:0] TRAN_WIDTH = 24;//8~32
 
-parameter Receive_VALID_at_FALLING = 0;
     
 //Debug port
 reg [31:0] r_Error_Count=0;
 
 //////////////////clock part////////////////////
 reg [1:0]r_Low_clock_count=0;
-always@(posedge c_clk_100m)begin
+always@(posedge c_Clk_High)begin
     r_Low_clock_count <= r_Low_clock_count+1;
 end
 wire c_Clk_Low;//slow clock for SPI clock output,will be 2X of actual output clock;
-assign c_Clk_Low=r_Low_clock_count[0];//25m SPI clock output
+assign c_Clk_Low=r_Low_clock_count[DIVIDE_VALUE_for_Clk_Freq];//25m SPI clock output
 //assign c_Clk_Low=r_Low_clock_count[1];//12.5m SPI clock output
 
 
@@ -75,12 +77,13 @@ reg [4:0]r_Send_SM = s_Sync_wait;
 reg r_Send_Sync_last = 0;
 reg [5:0]r_Bit_Index = 0;
 reg [TRAN_WIDTH-1:0]r_Send_Data_l = 0;
+reg [TRAN_WIDTH-1:0]r_Send_Data_l_for_r = 0;
 
 reg r_Receive_Data_lock_sig = 0;
 
 always@(posedge c_Clk_Low) begin
     case(r_Send_SM)
-    s_Sync_wait:///wait for the Sync Reverse to begin sending
+    s_Sync_wait:///wait for the Sync inverted to begin sending
         begin
             o_SPI_Clk  <= IDLE_VALUE_for_Clk;
             o_SPI_SS   <= 1'b1;
@@ -106,6 +109,7 @@ always@(posedge c_Clk_Low) begin
             o_SPI_MOSI <= IDLE_VALUE_for_MOSI;
             
             r_Send_Data_l <= i_SPI_Send_Data;
+            r_Send_Data_l_for_r <= i_SPI_Send_Data;
             r_Send_Sync_last <= ~r_Send_Sync_last;
            
             r_Send_SM <= s_Send_data;
@@ -172,6 +176,7 @@ end
 //stablize receive data before Receive_Sync
 always@(negedge r_Receive_Data_lock_sig)begin
     o_SPI_Receive_Data <= r_SPI_Receive_Data_pre;
+    o_SPI_Sent_Data <= r_Send_Data_l_for_r;
 end
 
  
