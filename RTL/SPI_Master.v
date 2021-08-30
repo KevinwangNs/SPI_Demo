@@ -15,7 +15,8 @@
 // 
 // Revision:
 // Revision 0.01 - File Created
-//          0.10  - 
+//          0.10 - Add receive
+//          0.11 - Add Send_  
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
@@ -168,7 +169,7 @@ always@(posedge w_SPI_Receive_Sample_Clk)begin
 		r_SPI_Receive_Data_pre = i_SPI_MISO + ( r_SPI_Receive_Data_pre << 1 );
 	end
 end
-
+//stablize receive data before Receive_Sync
 always@(negedge r_Receive_Data_lock_sig)begin
     o_SPI_Receive_Data <= r_SPI_Receive_Data_pre;
 end
