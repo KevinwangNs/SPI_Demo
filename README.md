@@ -8,6 +8,7 @@ Set parameters as your IC's datasheets suggested!
 * **DIVIDE_VALUE_for_Clk_Freq**
 
 if DIVIDE_VALUE_for_Clk_Freq=0,SPI_Clk frequency will be 1/4 of c_Clk_High frequency.
+
 if DIVIDE_VALUE_for_Clk_Freq=1,SPI_Clk frequency will be 1/8 of c_Clk_High frequency.
 
 * **DATA_VALID_at_FALLING**
@@ -25,6 +26,10 @@ The edge of slave sampling.boolean value,**1 for ture,0 for false**. :point_down
 
 The number of bits will be send in each SPI transaction,from 8bits to 32bits.  :point_down:  
 ![TRAN_WIDTH.png](https://github.com/KevinwangNs/SPI_Demo/blob/main/Image/TRAN_WIDTH.png)
+
+* **Receive_VALID_at_FALLING**
+The edge of SPI master sampling,same as DATA_VALID_at_FALLING in most occasions.opposite if you IC in Fast SDO bit (half-cycle speedup/TI DAC60508) mode.
+
 
 ### 2 Control the (Send/Receive)Interface
 * Send Interface
